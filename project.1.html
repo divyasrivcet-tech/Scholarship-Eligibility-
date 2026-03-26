@@ -1,0 +1,1556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Scholarship Eligibility & Reminder App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Simple, clean card layout and responsive structure are inspired by modern education and dashboard templates that use cards and soft colors. [web:1][web:2][web:6][web:9] -->
+  <style>
+    :root {
+      --primary: #1e88e5;
+      --primary-light: #e3f2fd;
+      --accent: #26a69a;
+      --bg: #f5f7fb;
+      --text: #1f2933;
+      --muted: #6b7280;
+      --danger: #e53935;
+      --radius: 14px;
+      --shadow: 0 8px 20px rgba(15, 23, 42, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .app {
+      max-width: 480px;
+      margin: 0 auto;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: #ffffff;
+      box-shadow: 0 0 20px rgba(15, 23, 42, 0.16);
+    }
+
+    header {
+      padding: 16px 20px 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    header h1 {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    header .lang-toggle {
+      display: flex;
+      gap: 4px;
+      background: var(--primary-light);
+      border-radius: 999px;
+      padding: 2px;
+    }
+
+    .lang-toggle button {
+      border: none;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: transparent;
+      font-size: 12px;
+      cursor: pointer;
+      color: var(--muted);
+    }
+
+    .lang-toggle button.active {
+      background: #ffffff;
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    main {
+      flex: 1;
+      padding: 16px 16px 72px;
+      overflow-y: auto;
+    }
+
+    .screen {
+      display: none;
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .card {
+      background: #ffffff;
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: var(--shadow);
+      margin-bottom: 16px;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .card-subtitle {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .pill {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: var(--primary-light);
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 16px;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      transition: background 0.15s ease, transform 0.1s ease;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), #00b894);
+      color: #ffffff;
+      width: 100%;
+    }
+
+    .btn-secondary {
+      background: #e5f2ff;
+      color: var(--primary);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--muted);
+    }
+
+    .btn:active {
+      transform: scale(0.97);
+    }
+
+    .center {
+      text-align: center;
+    }
+
+    /* Onboarding */
+    .onboard-illustration {
+      width: 100%;
+      height: 180px;
+      border-radius: 24px;
+      background: radial-gradient(circle at top left, #bbdefb, #e0f2f1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .onboard-illustration::before {
+      content: "₹";
+      position: absolute;
+      font-size: 90px;
+      top: -12px;
+      left: 22px;
+      color: rgba(25, 118, 210, 0.18);
+      font-weight: 800;
+    }
+
+    .onboard-illustration::after {
+      content: "🎓";
+      position: absolute;
+      font-size: 70px;
+      right: 16px;
+      bottom: 10px;
+      opacity: 0.9;
+    }
+
+    .onboard-steps {
+      margin: 16px 0 20px;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .onboard-steps li {
+      margin-bottom: 4px;
+    }
+
+    /* Form styles */
+    .form-group {
+      margin-bottom: 12px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 13px;
+      margin-bottom: 4px;
+      color: var(--muted);
+    }
+
+    .form-input,
+    select {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+      font-size: 14px;
+      outline: none;
+      transition: border 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .form-input:focus,
+    select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 1px rgba(30, 136, 229, 0.25);
+    }
+
+    .radio-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .chip-radio {
+      border-radius: 999px;
+      padding: 6px 12px;
+      border: 1px solid #d1d5db;
+      font-size: 13px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--muted);
+      background: #ffffff;
+    }
+
+    .chip-radio input {
+      display: none;
+    }
+
+    .chip-radio.active {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    .hint {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    /* Dashboard */
+    .greeting {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .sub-greeting {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+
+    .summary-chip {
+      font-size: 13px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: #e8f5e9;
+      color: #2e7d32;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .summary-number {
+      font-size: 30px;
+      font-weight: 800;
+      color: var(--accent);
+    }
+
+    /* Scholarship cards */
+    .scholarship-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .scholar-card {
+      border-radius: var(--radius);
+      border: 1px solid #e5e7eb;
+      padding: 12px 14px;
+      background: #ffffff;
+    }
+
+    .scholar-name {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .scholar-meta {
+      font-size: 12px;
+      color: var(--muted);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .tag {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: #e8f5e9;
+      color: #2e7d32;
+      font-weight: 600;
+    }
+
+    .danger-tag {
+      background: #ffebee;
+      color: var(--danger);
+    }
+
+    .scholar-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 4px;
+    }
+
+    /* Details screen */
+    .details-section-title {
+      font-size: 14px;
+      font-weight: 700;
+      margin-top: 10px;
+      margin-bottom: 4px;
+    }
+
+    .details-list {
+      font-size: 13px;
+      color: var(--muted);
+      margin-left: 16px;
+    }
+
+    .details-list li {
+      margin-bottom: 2px;
+    }
+
+    /* Reminder screen */
+    .toggle-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .toggle {
+      width: 44px;
+      height: 24px;
+      border-radius: 999px;
+      background: #d1d5db;
+      position: relative;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+
+    .toggle-circle {
+      width: 20px;
+      height: 20px;
+      border-radius: 999px;
+      background: #ffffff;
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      transition: transform 0.15s ease;
+      box-shadow: 0 1px 4px rgba(15, 23, 42, 0.3);
+    }
+
+    .toggle.on {
+      background: var(--accent);
+    }
+
+    .toggle.on .toggle-circle {
+      transform: translateX(20px);
+    }
+
+    .radio-inline {
+      display: flex;
+      gap: 8px;
+      margin-top: 6px;
+      flex-wrap: wrap;
+    }
+
+    .chip-option {
+      padding: 6px 10px;
+      font-size: 12px;
+      border-radius: 999px;
+      border: 1px solid #d1d5db;
+      cursor: pointer;
+      color: var(--muted);
+      background: #ffffff;
+    }
+
+    .chip-option.active {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    .sms-info {
+      margin-top: 8px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* Tracking */
+    .status-pill {
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .status-not-applied {
+      background: #f3f4f6;
+      color: #6b7280;
+    }
+
+    .status-applied {
+      background: #e3f2fd;
+      color: var(--primary);
+    }
+
+    .status-pending {
+      background: #fff3e0;
+      color: #ef6c00;
+    }
+
+    .status-approved {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+
+    /* Bottom nav */
+    .bottom-nav {
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: 0;
+      width: 100%;
+      max-width: 480px;
+      background: #ffffff;
+      border-top: 1px solid #e5e7eb;
+      padding: 6px 4px 6px;
+      display: flex;
+      justify-content: space-around;
+      z-index: 20;
+    }
+
+    .nav-item {
+      flex: 1;
+      text-align: center;
+      font-size: 11px;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 4px 0;
+    }
+
+    .nav-item span {
+      display: block;
+    }
+
+    .nav-item i {
+      font-size: 18px;
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    .nav-item.active {
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    /* Utility */
+    .mt-12 {
+      margin-top: 12px;
+    }
+
+    .mt-16 {
+      margin-top: 16px;
+    }
+
+    .badge-red {
+      background: #ffebee;
+      color: var(--danger);
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 600;
+    }
+
+    @media (max-width: 360px) {
+      main {
+        padding: 12px 10px 72px;
+      }
+      .card {
+        padding: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1 id="appTitle">Path2Fund</h1>
+      <div class="lang-toggle">
+        <button id="langEn" class="active">EN</button>
+        <button id="langTa">தமிழ்</button>
+      </div>
+    </header>
+
+    <main>
+      <!-- 1. Onboarding Screen -->
+      <section id="screen-onboarding" class="screen active">
+        <div class="card">
+          <div class="onboard-illustration">
+            <div class="center">
+              <div
+                style="
+                  background: rgba(255, 255, 255, 0.85);
+                  padding: 8px 14px;
+                  border-radius: 999px;
+                  font-size: 13px;
+                  color: var(--primary);
+                  font-weight: 600;
+                "
+              >
+                Find Scholarships, On Time.
+              </div>
+            </div>
+          </div>
+          <h2 class="center" id="onboardTitle">
+            Find the right scholarship in minutes
+          </h2>
+          <p
+            class="center"
+            id="onboardSub"
+            style="margin-top: 8px; font-size: 13px; color: var(--muted)"
+          >
+            Enter your details once. We will auto-match government and private
+            schemes for you and remind you before deadlines.
+          </p>
+
+          <ul class="onboard-steps">
+            <li>Fill your basic details (course, category, income).</li>
+            <li>See schemes that match your profile automatically.</li>
+            <li>Get SMS reminders before last date (up to 5 alerts).</li>
+          </ul>
+
+          <button
+            class="btn btn-primary mt-16"
+            id="btnGetStarted"
+            type="button"
+          >
+            Get Started
+          </button>
+        </div>
+      </section>
+
+      <!-- 2. Student Details Form Screen -->
+      <section id="screen-form" class="screen">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Student details</div>
+              <div class="card-subtitle">
+                Tell us about you to find matching scholarships.
+              </div>
+            </div>
+            <span class="pill">Step 1/2</span>
+          </div>
+
+          <form id="studentForm">
+            <div class="form-group">
+              <label class="form-label">Name</label>
+              <input
+                type="text"
+                class="form-input"
+                id="name"
+                placeholder="Enter full name"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Age</label>
+              <input
+                type="number"
+                class="form-input"
+                id="age"
+                min="10"
+                max="40"
+                placeholder="18"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Gender</label>
+              <select id="gender" required>
+                <option value="">Select</option>
+                <option value="female">Female</option>
+                <option value="male">Male</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Category</label>
+              <div class="radio-row" id="categoryGroup">
+                <label class="chip-radio">
+                  <input type="radio" name="category" value="BC" />BC
+                </label>
+                <label class="chip-radio">
+                  <input type="radio" name="category" value="MBC" />MBC
+                </label>
+                <label class="chip-radio">
+                  <input type="radio" name="category" value="SC" />SC
+                </label>
+                <label class="chip-radio">
+                  <input type="radio" name="category" value="ST" />ST
+                </label>
+                <label class="chip-radio">
+                  <input type="radio" name="category" value="OC" />OC
+                </label>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Education level</label>
+              <div class="radio-row" id="educationGroup">
+                <label class="chip-radio">
+                  <input type="radio" name="education" value="School" />School
+                </label>
+                <label class="chip-radio">
+                  <input type="radio" name="education" value="Diploma" />Diploma
+                </label>
+                <label class="chip-radio">
+                  <input type="radio" name="education" value="UG" />UG
+                </label>
+                <label class="chip-radio">
+                  <input type="radio" name="education" value="PG" />PG
+                </label>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Annual family income (₹)</label>
+              <input
+                type="number"
+                class="form-input"
+                id="income"
+                placeholder="Example: 250000"
+              />
+              <div class="hint">Approximate value is enough.</div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">State</label>
+              <select id="state">
+                <option value="">Select state</option>
+                <option value="Tamil Nadu">Tamil Nadu</option>
+                <option value="Karnataka">Karnataka</option>
+                <option value="Kerala">Kerala</option>
+                <option value="Andhra Pradesh">Andhra Pradesh</option>
+                <option value="Telangana">Telangana</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">District</label>
+              <input
+                type="text"
+                class="form-input"
+                id="district"
+                placeholder="Example: Salem"
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Mobile number</label>
+              <input
+                type="tel"
+                class="form-input"
+                id="mobile"
+                placeholder="10-digit mobile number"
+                pattern="[0-9]{10}"
+                required
+              />
+              <div class="hint">
+                We will send up to 5 SMS reminders per scholarship.
+              </div>
+            </div>
+
+            <button class="btn btn-primary mt-16" type="submit">
+              Save &amp; View Scholarships
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <!-- 3. Dashboard / Home Screen -->
+      <section id="screen-dashboard" class="screen">
+        <div class="card">
+          <div class="greeting" id="greetingText">Hi, Student 👋</div>
+          <div class="sub-greeting">
+            These scholarships match your profile. Apply before the last date.
+          </div>
+
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-top: 4px;
+            "
+          >
+            <div>
+              <div class="card-subtitle">You are eligible for</div>
+              <div class="summary-number" id="eligibleCount">0</div>
+            </div>
+            <div style="text-align: right">
+              <div class="summary-chip">
+                <span>Smart match</span>
+                <span>✅</span>
+              </div>
+              <div class="hint">Based on your details</div>
+            </div>
+          </div>
+
+          <button
+            class="btn btn-secondary mt-16"
+            type="button"
+            id="btnViewSchemesFromHome"
+          >
+            View eligible schemes
+          </button>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Quick links</div>
+          <div
+            style="
+              display: flex;
+              gap: 8px;
+              margin-top: 10px;
+              flex-wrap: wrap;
+            "
+          >
+            <button
+              class="btn btn-ghost"
+              type="button"
+              id="btnGoRemindersFromHome"
+            >
+              Reminder settings
+            </button>
+            <button
+              class="btn btn-ghost"
+              type="button"
+              id="btnGoProfileFromHome"
+            >
+              Edit profile
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. Scholarship Recommendation Screen -->
+      <section id="screen-recommendations" class="screen">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Eligible scholarships</div>
+              <div class="card-subtitle">
+                Filtered automatically for your category and course.
+              </div>
+            </div>
+            <span class="pill" id="countLabel">0 matches</span>
+          </div>
+
+          <div class="scholarship-list" id="scholarshipList"></div>
+        </div>
+      </section>
+
+      <!-- 5. Scholarship Details Screen -->
+      <section id="screen-details" class="screen">
+        <div class="card" id="detailsCard">
+          <!-- Filled via JS -->
+        </div>
+      </section>
+
+      <!-- 6. Reminder & Notification Screen -->
+      <section id="screen-reminders" class="screen">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Reminders &amp; SMS</div>
+              <div class="card-subtitle">
+                Never miss a last date. We send gentle SMS alerts.
+              </div>
+            </div>
+            <span class="badge-red">Max 5 SMS / scheme</span>
+          </div>
+
+          <div class="toggle-row">
+            <div>
+              <div style="font-size: 14px; font-weight: 600">
+                Scholarship reminders
+              </div>
+              <div class="hint">Turn ON to get SMS and in-app alerts.</div>
+            </div>
+            <div id="reminderToggle" class="toggle">
+              <div class="toggle-circle"></div>
+            </div>
+          </div>
+
+          <div class="form-group mt-12">
+            <label class="form-label">Reminder timing</label>
+            <div class="radio-inline" id="reminderTimeGroup">
+              <button
+                type="button"
+                class="chip-option active"
+                data-value="1"
+              >
+                1 day before
+              </button>
+              <button type="button" class="chip-option" data-value="3">
+                3 days before
+              </button>
+              <button type="button" class="chip-option" data-value="7">
+                7 days before
+              </button>
+            </div>
+            <div class="hint">
+              We will schedule up to 5 SMS reminders spread before the last
+              date.
+            </div>
+          </div>
+
+          <div class="sms-info" id="smsInfo">
+            SMS will be sent to: <span id="smsMobile">Not set</span>.
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Upcoming deadlines</div>
+          <div id="upcomingList" class="scholarship-list mt-12"></div>
+        </div>
+      </section>
+
+      <!-- 7. Application Tracking Screen -->
+      <section id="screen-tracking" class="screen">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Application tracking</div>
+              <div class="card-subtitle">
+                Track where you have applied and what is pending.
+              </div>
+            </div>
+          </div>
+
+          <div id="trackingList" class="scholarship-list"></div>
+        </div>
+      </section>
+
+      <!-- Profile (reuse form data view) -->
+      <section id="screen-profile" class="screen">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Your profile</div>
+              <div class="card-subtitle">
+                Update your details to refresh scholarship matches.
+              </div>
+            </div>
+          </div>
+          <button class="btn btn-primary mt-12" type="button" id="btnEditForm">
+            Edit details
+          </button>
+
+          <div style="margin-top: 14px; font-size: 13px; color: var(--muted)">
+            <div id="profileSummary"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- 9. Bottom Navigation -->
+    <nav class="bottom-nav">
+      <div class="nav-item active" data-target="dashboard">
+        <i>🏠</i>
+        <span>Home</span>
+      </div>
+      <div class="nav-item" data-target="recommendations">
+        <i>🎓</i>
+        <span>Schemes</span>
+      </div>
+      <div class="nav-item" data-target="reminders">
+        <i>⏰</i>
+        <span>Reminders</span>
+      </div>
+      <div class="nav-item" data-target="profile">
+        <i>👤</i>
+        <span>Profile</span>
+      </div>
+    </nav>
+  </div>
+
+  <script>
+    // -------------------------------
+    // Simple data & state
+    // -------------------------------
+
+    const scholarships = [
+      {
+        id: 1,
+        name: "Post Matric Scholarship for SC Students - Tamil Nadu",
+        amount: "₹7,500 per year",
+        lastDate: "2026-04-30",
+        category: ["SC"],
+        education: ["UG", "PG", "Diploma"],
+        maxIncome: 250000,
+        states: ["Tamil Nadu"],
+        documents: [
+          "Aadhaar card",
+          "Community certificate",
+          "Income certificate",
+          "Bank passbook",
+          "Previous year mark sheet",
+        ],
+        description:
+          "Financial support for SC students pursuing higher education in recognized institutions in Tamil Nadu.",
+      },
+      {
+        id: 2,
+        name: "BC/MBC Scholarship - Tamil Nadu",
+        amount: "₹4,000 per year",
+        lastDate: "2026-05-15",
+        category: ["BC", "MBC"],
+        education: ["School", "UG", "PG"],
+        maxIncome: 200000,
+        states: ["Tamil Nadu"],
+        documents: [
+          "Community certificate",
+          "Income certificate",
+          "Bonafide certificate",
+        ],
+        description:
+          "Scholarship for BC/MBC students of Tamil Nadu studying in recognized schools and colleges.",
+      },
+      {
+        id: 3,
+        name: "National Means-cum-Merit Scholarship",
+        amount: "₹12,000 per year",
+        lastDate: "2026-06-10",
+        category: ["BC", "MBC", "SC", "ST", "OC"],
+        education: ["School"],
+        maxIncome: 350000,
+        states: ["Tamil Nadu", "Karnataka", "Kerala", "Andhra Pradesh", "Telangana", "Other"],
+        documents: ["Income certificate", "Bank details", "School ID"],
+        description:
+          "Central government scholarship for meritorious students of economically weaker sections studying in class 9 and above.",
+      },
+      {
+        id: 4,
+        name: "Merit Scholarship for UG Girls",
+        amount: "₹10,000 one-time",
+        lastDate: "2026-04-20",
+        category: ["BC", "MBC", "SC", "ST", "OC"],
+        education: ["UG"],
+        maxIncome: 400000,
+        states: ["Tamil Nadu", "Other"],
+        documents: [
+          "Aadhaar card",
+          "College ID",
+          "Admission proof",
+          "Bank passbook",
+        ],
+        description:
+          "Support for first-year UG girl students with good academic performance.",
+        genderPreference: "female",
+      },
+    ];
+
+    let student = null;
+    let eligibleScholarships = [];
+    let trackingStatus = {}; // { scholarshipId: 'Not Applied'|'Applied'|'Pending'|'Approved' }
+    let currentDetailsId = null;
+    let remindersOn = false;
+    let reminderDaysBefore = 1;
+
+    // -------------------------------
+    // Helpers
+    // -------------------------------
+    function $(id) {
+      return document.getElementById(id);
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return "";
+      const date = new Date(dateStr);
+      return date.toLocaleDateString("en-IN", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      });
+    }
+
+    function daysLeft(dateStr) {
+      const today = new Date();
+      const target = new Date(dateStr);
+      const diff = Math.ceil((target - today) / (1000 * 60 * 60 * 24));
+      return diff;
+    }
+
+    function showScreen(name) {
+      document.querySelectorAll(".screen").forEach((s) => {
+        s.classList.remove("active");
+      });
+      const target = $("screen-" + name);
+      if (target) target.classList.add("active");
+    }
+
+    function updateNavActive(targetName) {
+      document.querySelectorAll(".nav-item").forEach((item) => {
+        item.classList.toggle(
+          "active",
+          item.getAttribute("data-target") === targetName
+        );
+      });
+    }
+
+    function getSelectedRadioValue(groupName) {
+      const checked = document.querySelector(
+        `input[name="${groupName}"]:checked`
+      );
+      return checked ? checked.value : "";
+    }
+
+    function setChipGroupHandling(containerId, inputName) {
+      const group = $(containerId);
+      if (!group) return;
+      group.addEventListener("click", (e) => {
+        const label = e.target.closest(".chip-radio");
+        if (!label) return;
+        const input = label.querySelector("input");
+        input.checked = true;
+        group
+          .querySelectorAll(".chip-radio")
+          .forEach((l) => l.classList.remove("active"));
+        label.classList.add("active");
+      });
+    }
+
+    function refreshProfileSummary() {
+      if (!student) {
+        $("profileSummary").textContent =
+          "Profile not filled. Please add your details.";
+        return;
+      }
+      const lines = [];
+      lines.push(`Name: ${student.name}`);
+      lines.push(
+        `Category: ${student.category}, Course: ${student.education}, Age: ${student.age}`
+      );
+      lines.push(
+        `Income: ₹${student.income || "N/A"}, Location: ${
+          student.state || "N/A"
+        }, ${student.district || ""}`.trim()
+      );
+      lines.push(`Mobile: ${student.mobile}`);
+      $("profileSummary").innerHTML = lines
+        .map((l) => `<div>${l}</div>`)
+        .join("");
+    }
+
+    function computeEligibleScholarships() {
+      if (!student) return [];
+      return scholarships.filter((s) => {
+        if (!s.category.includes(student.category)) return false;
+        if (!s.education.includes(student.education)) return false;
+        if (s.states && !s.states.includes(student.state || "Other"))
+          return false;
+        if (s.maxIncome && student.income && student.income > s.maxIncome)
+          return false;
+        if (s.genderPreference && s.genderPreference !== student.gender)
+          return false;
+        return true;
+      });
+    }
+
+    function renderScholarshipList() {
+      const container = $("scholarshipList");
+      container.innerHTML = "";
+      if (!eligibleScholarships.length) {
+        container.innerHTML =
+          '<div style="font-size:13px;color:var(--muted)">No matching scholarships found yet. Try updating category, income or education level.</div>';
+        return;
+      }
+      eligibleScholarships.forEach((s) => {
+        const left = daysLeft(s.lastDate);
+        const urgent = left <= 5;
+        const div = document.createElement("div");
+        div.className = "scholar-card";
+        div.innerHTML = `
+          <div class="scholar-name">${s.name}</div>
+          <div class="scholar-meta">
+            <span>Amount: <strong>${s.amount}</strong></span>
+            <span>Last date: ${formatDate(s.lastDate)}</span>
+          </div>
+          <div class="scholar-meta">
+            <span class="tag">Matched for you ✅</span>
+            ${
+              urgent
+                ? `<span class="danger-tag">Only ${left} days left</span>`
+                : ""
+            }
+          </div>
+          <div class="scholar-footer">
+            <button class="btn btn-secondary" data-id="${
+              s.id
+            }" data-action="view-details">View details</button>
+            <button class="btn btn-ghost" data-id="${
+              s.id
+            }" data-action="track-toggle">
+              ${trackingStatus[s.id] && trackingStatus[s.id] !== "Not Applied"
+                ? "Update status"
+                : "Mark as applied"}
+            </button>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function renderUpcomingDeadlines() {
+      const container = $("upcomingList");
+      container.innerHTML = "";
+      const sorted = [...eligibleScholarships].sort(
+        (a, b) => new Date(a.lastDate) - new Date(b.lastDate)
+      );
+      sorted.slice(0, 3).forEach((s) => {
+        const left = daysLeft(s.lastDate);
+        const div = document.createElement("div");
+        div.className = "scholar-card";
+        div.innerHTML = `
+          <div class="scholar-name">${s.name}</div>
+          <div class="scholar-meta">
+            <span>Last date: ${formatDate(s.lastDate)}</span>
+            <span>${left >= 0 ? left : 0} days remaining</span>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+      if (!sorted.length) {
+        container.innerHTML =
+          '<div style="font-size:13px;color:var(--muted)">No upcoming deadlines. Add your details to see alerts.</div>';
+      }
+    }
+
+    function renderTrackingList() {
+      const container = $("trackingList");
+      container.innerHTML = "";
+      if (!eligibleScholarships.length) {
+        container.innerHTML =
+          '<div style="font-size:13px;color:var(--muted)">No scholarships to track yet.</div>';
+        return;
+      }
+      eligibleScholarships.forEach((s) => {
+        const status = trackingStatus[s.id] || "Not Applied";
+        let statusClass = "status-not-applied";
+        if (status === "Applied") statusClass = "status-applied";
+        if (status === "Pending") statusClass = "status-pending";
+        if (status === "Approved") statusClass = "status-approved";
+
+        const div = document.createElement("div");
+        div.className = "scholar-card";
+        div.innerHTML = `
+          <div class="scholar-name">${s.name}</div>
+          <div class="scholar-meta">
+            <span>Last date: ${formatDate(s.lastDate)}</span>
+            <span>Amount: ${s.amount}</span>
+          </div>
+          <div class="scholar-footer">
+            <span class="status-pill ${statusClass}">${status}</span>
+            <select data-id="${s.id}" class="form-input" style="max-width: 160px;font-size:12px;padding:6px 8px;">
+              <option value="Not Applied" ${
+                status === "Not Applied" ? "selected" : ""
+              }>Not Applied</option>
+              <option value="Applied" ${
+                status === "Applied" ? "selected" : ""
+              }>Applied</option>
+              <option value="Pending" ${
+                status === "Pending" ? "selected" : ""
+              }>Pending</option>
+              <option value="Approved" ${
+                status === "Approved" ? "selected" : ""
+              }>Approved</option>
+            </select>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function openDetails(id) {
+      const s = scholarships.find((x) => x.id === id);
+      if (!s) return;
+      currentDetailsId = id;
+      const left = daysLeft(s.lastDate);
+      const urgent = left <= 5;
+
+      const docsHtml = s.documents
+        .map((d) => `<li>${d}</li>`)
+        .join("");
+
+      const criteria = [];
+      criteria.push(`Category: ${s.category.join(", ")}`);
+      criteria.push(`Education level: ${s.education.join(", ")}`);
+      if (s.maxIncome)
+        criteria.push(`Income up to ₹${s.maxIncome.toLocaleString("en-IN")}`);
+      if (s.states)
+        criteria.push(`For students from: ${s.states.join(", ")}`);
+      if (s.genderPreference)
+        criteria.push(`Gender preference: ${s.genderPreference}`);
+
+      const criteriaHtml = criteria.map((c) => `<li>${c}</li>`).join("");
+
+      $("detailsCard").innerHTML = `
+        <div class="card-header">
+          <div>
+            <div class="card-title">${s.name}</div>
+            <div class="card-subtitle">Amount: ${s.amount}</div>
+          </div>
+          <span class="pill">${
+            urgent
+              ? `Last date: ${formatDate(s.lastDate)}`
+              : `Apply by: ${formatDate(s.lastDate)}`
+          }</span>
+        </div>
+
+        <div style="font-size:13px;color:var(--muted);margin-bottom:6px;">
+          ${s.description}
+        </div>
+
+        <div class="details-section-title">Required documents</div>
+        <ul class="details-list">
+          ${docsHtml}
+        </ul>
+
+        <div class="details-section-title">Eligibility criteria</div>
+        <ul class="details-list">
+          ${criteriaHtml}
+        </ul>
+
+        <div class="details-section-title">Status &amp; reminders</div>
+        <div class="hint">
+          Mark as applied and keep reminders ON to get up to 5 SMS alerts to your mobile before the deadline.
+        </div>
+
+        <button class="btn btn-primary mt-16" id="btnApplyNow" type="button">
+          Apply Now
+        </button>
+        <button class="btn btn-ghost mt-12" id="btnBackToSchemes" type="button">
+          Back to schemes
+        </button>
+      `;
+      showScreen("details");
+    }
+
+    // -------------------------------
+    // Init & event listeners
+    // -------------------------------
+    document.addEventListener("DOMContentLoaded", () => {
+      // Activate chip groups
+      setChipGroupHandling("categoryGroup", "category");
+      setChipGroupHandling("educationGroup", "education");
+
+      // Onboarding
+      $("btnGetStarted").addEventListener("click", () => {
+        showScreen("form");
+      });
+
+      // Form submit
+      $("studentForm").addEventListener("submit", (e) => {
+        e.preventDefault();
+        const name = $("name").value.trim();
+        const age = parseInt($("age").value || "0", 10);
+        const gender = $("gender").value;
+        const category = getSelectedRadioValue("category");
+        const education = getSelectedRadioValue("education");
+        const income = parseInt($("income").value || "0", 10);
+        const state = $("state").value || "Other";
+        const district = $("district").value.trim();
+        const mobile = $("mobile").value.trim();
+
+        if (!name || !age || !gender || !category || !education || !mobile) {
+          alert("Please fill all the required fields.");
+          return;
+        }
+
+        student = {
+          name,
+          age,
+          gender,
+          category,
+          education,
+          income,
+          state,
+          district,
+          mobile,
+        };
+
+        eligibleScholarships = computeEligibleScholarships();
+        $("eligibleCount").textContent = eligibleScholarships.length;
+        $("countLabel").textContent = `${eligibleScholarships.length} matches`;
+        $("greetingText").textContent = `Hi, ${student.name.split(" ")[0]} 👋`;
+        $("smsMobile").textContent = mobile;
+        refreshProfileSummary();
+        renderScholarshipList();
+        renderUpcomingDeadlines();
+        renderTrackingList();
+
+        showScreen("dashboard");
+        updateNavActive("dashboard");
+      });
+
+      // Bottom nav clicks
+      document.querySelectorAll(".nav-item").forEach((item) => {
+        item.addEventListener("click", () => {
+          const target = item.getAttribute("data-target");
+          updateNavActive(target);
+          showScreen(target);
+          if (target === "recommendations") {
+            renderScholarshipList();
+          }
+          if (target === "reminders") {
+            renderUpcomingDeadlines();
+          }
+          if (target === "profile") {
+            refreshProfileSummary();
+          }
+          if (target === "tracking") {
+            renderTrackingList();
+          }
+        });
+      });
+
+      // Buttons from dashboard
+      $("btnViewSchemesFromHome").addEventListener("click", () => {
+        showScreen("recommendations");
+        updateNavActive("recommendations");
+        renderScholarshipList();
+      });
+
+      $("btnGoRemindersFromHome").addEventListener("click", () => {
+        showScreen("reminders");
+        updateNavActive("reminders");
+        renderUpcomingDeadlines();
+      });
+
+      $("btnGoProfileFromHome").addEventListener("click", () => {
+        showScreen("profile");
+        updateNavActive("profile");
+        refreshProfileSummary();
+      });
+
+      // Schemes: list actions
+      $("scholarshipList").addEventListener("click", (e) => {
+        const btn = e.target.closest("button");
+        if (!btn) return;
+        const id = parseInt(btn.getAttribute("data-id"), 10);
+        const action = btn.getAttribute("data-action");
+        if (action === "view-details") {
+          openDetails(id);
+        }
+        if (action === "track-toggle") {
+          trackingStatus[id] = trackingStatus[id] || "Applied";
+          renderTrackingList();
+          alert(
+            "Status set to '" +
+              trackingStatus[id] +
+              "'. You can update it in the Tracking tab."
+          );
+        }
+      });
+
+      // Details buttons
+      $("screen-details").addEventListener("click", (e) => {
+        const target = e.target;
+        if (target.id === "btnBackToSchemes") {
+          showScreen("recommendations");
+        }
+        if (target.id === "btnApplyNow") {
+
+  let applyLink = "";
+
+  // Map scholarship to real portals
+  if (currentDetailsId === 1 || currentDetailsId === 2 || currentDetailsId === 3) {
+    applyLink = "https://scholarships.gov.in"; // Govt NSP
+  } 
+  else if (currentDetailsId === 4) {
+    applyLink = "https://www.buddy4study.com"; // Private scholarship
+  } 
+  else {
+    applyLink = "https://scholarships.tn.gov.in"; // Default state portal
+  }
+
+  // Open real portal
+  window.open(applyLink, "_blank");
+
+  // Keep your existing tracking logic
+  if (currentDetailsId && !trackingStatus[currentDetailsId]) {
+    trackingStatus[currentDetailsId] = "Applied";
+    renderTrackingList();
+  }
+}
+      });
+
+      // Reminder toggle
+      $("reminderToggle").addEventListener("click", () => {
+        remindersOn = !remindersOn;
+        $("reminderToggle").classList.toggle("on", remindersOn);
+        if (remindersOn) {
+          alert(
+            "Reminders ON. We will send up to 5 SMS alerts per scholarship before the last date."
+          );
+        }
+      });
+
+      // Reminder time chips
+      $("reminderTimeGroup").addEventListener("click", (e) => {
+        const chip = e.target.closest(".chip-option");
+        if (!chip) return;
+        $("reminderTimeGroup")
+          .querySelectorAll(".chip-option")
+          .forEach((c) => c.classList.remove("active"));
+        chip.classList.add("active");
+        reminderDaysBefore = parseInt(chip.getAttribute("data-value"), 10);
+      });
+
+      // Tracking status change
+      $("trackingList").addEventListener("change", (e) => {
+        const select = e.target;
+        if (select.tagName !== "SELECT") return;
+        const id = parseInt(select.getAttribute("data-id"), 10);
+        const value = select.value;
+        trackingStatus[id] = value;
+        renderTrackingList();
+      });
+
+      // Edit form from profile
+      $("btnEditForm").addEventListener("click", () => {
+        if (student) {
+          $("name").value = student.name;
+          $("age").value = student.age;
+          $("gender").value = student.gender;
+          $("income").value = student.income || "";
+          $("state").value = student.state || "";
+          $("district").value = student.district || "";
+          $("mobile").value = student.mobile || "";
+
+          // Restore radios visually
+          document
+            .querySelectorAll("#categoryGroup .chip-radio")
+            .forEach((l) => {
+              const input = l.querySelector("input");
+              const match = input.value === student.category;
+              input.checked = match;
+              l.classList.toggle("active", match);
+            });
+          document
+            .querySelectorAll("#educationGroup .chip-radio")
+            .forEach((l) => {
+              const input = l.querySelector("input");
+              const match = input.value === student.education;
+              input.checked = match;
+              l.classList.toggle("active", match);
+            });
+        }
+        showScreen("form");
+      });
+
+      // Language toggle (very simple demo text change)
+      $("langEn").addEventListener("click", () => {
+        $("langEn").classList.add("active");
+        $("langTa").classList.remove("active");
+        $("onboardTitle").textContent =
+          "Find the right scholarship in minutes";
+        $("onboardSub").textContent =
+          "Enter your details once. We will auto-match government and private schemes for you and remind you before deadlines.";
+        $("appTitle").textContent = "ScholarEasy";
+      });
+
+      $("langTa").addEventListener("click", () => {
+        $("langTa").classList.add("active");
+        $("langEn").classList.remove("active");
+        $("onboardTitle").textContent =
+          "உங்களுக்கு பொருத்தமான உதவித்தொகை சில நிமிடங்களில்";
+        $("onboardSub").textContent =
+          "ஒரே முறை உங்கள் விவரங்களை நிரப்புங்கள். அதற்கேற்ப உங்களுக்கு பொருந்தும் திட்டங்களை தேர்ந்தெடுத்து, கடைசி தேதிக்கு முன் நினைவூட்டுவோம்.";
+        $("appTitle").textContent = "ScholarEasy";
+      });
+    });
+  </script>
+</body>
+</html>
