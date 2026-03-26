@@ -1,1 +1,1 @@
-# Scholarship-Eligibility-
+# Scholarship-Eligibility
